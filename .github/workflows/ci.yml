@@ -60,9 +60,14 @@ jobs:
           ./tuxback schedule-add test_data 1
           ./tuxback schedule-list
           ./tuxback run-scheduler
+     
+      - name: Run launcher status command
+        run: ./tuxback status
 
       - name: Check log file creation
-        run: test -f tuxback.log
+        run: |
+          test -f "$HOME/.local/state/tuxback/tuxback.log"
+          tail -n 20 "$HOME/.local/state/tuxback/tuxback.log"
 
       - name: Build Docker image
         run: docker build -t tuxback .

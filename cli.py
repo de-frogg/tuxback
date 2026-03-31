@@ -1,8 +1,15 @@
 import argparse
 import logging
-
+# Импорт основных функций приложения. Каждый модуль отвечает за отдельную часть.
 from app.backup import create_backup
-from app.config import APP_NAME, APP_VERSION, BACKUP_DIR, LOG_FILE, SCHEDULE_FILE, setup_logging
+from app.config import (
+    APP_NAME,
+    APP_VERSION,
+    BACKUP_DIR,
+    LOG_FILE,
+    SCHEDULE_FILE,
+    setup_logging,
+)
 from app.restore import restore_backup
 from app.scheduler import (
     add_schedule,
@@ -11,23 +18,37 @@ from app.scheduler import (
     run_due_schedules,
 )
 from app.storage import delete_backup, list_backups
-
+# Инициализация логгера для CLI-модуля. Через него будут записываться все действия пользователя, выполненные через командную строку.
 logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    "Главная точка входа CLI-приложения."
-    setup_logging()
+    """
+    Главная точка входа CLI-приложения.
 
+    Здесь происходит:
+    1. настройка логирования
+    2. создание CLI-интерфейса через argparse
+    3. регистрация всех доступных команд
+    4. разбор аргументов командной строки
+    5. вызов нужной функции в зависимости от команды пользователя
+    6. обработка возможных ошибок
+    """
+
+    # Настраиваем логирование до выполнения любых действий. Это позволяет фиксировать весь жизненный цикл вызова команды.
+    setup_logging()
+    # Создаём основной parser командной строки. Через него будут регистрироваться все подкоманды приложения.
     parser = argparse.ArgumentParser(
         description="CLI service for backup and restore operations"
     )
+
+    # Глобальный флаг версии приложения. Позволяет вывести номер версии без выполнения команды.
     parser.add_argument(
         "--version",
         action="version",
         version=f"%(prog)s {APP_VERSION}",
     )
-
+    # Создаём контейнер для подкоманд CLI. Например: tuxback backup, tuxback restore, tuxback status
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     backup_parser = subparsers.add_parser("backup", help="Create a backup of a directory")
@@ -173,10 +194,11 @@ def main() -> None:
                     )
 
     except Exception as error:
+    # Ошибки CLI пишем в лог. Для пользователя выводим короткое сообщение.
         logger.error("CLI command failed: %s", error)
         logger.debug("CLI traceback details", exc_info=True)
         print(f"Error: {error}")
 
-
+    # Ошибки CLI пишем в лог. Для пользователя выводим короткое сообщение.
 if __name__ == "__main__":
     main()
